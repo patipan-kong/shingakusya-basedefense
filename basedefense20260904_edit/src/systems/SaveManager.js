@@ -1,13 +1,13 @@
-// จัดการข้อมูลที่ต้องอยู่ข้ามเซสชัน (persistence) ผ่าน localStorage + server (api-basedefense เมื่อมี member_id)
+// จัดการข้อมูลที่ต้องอยู่ข้ามเซสชัน (persistence) — server-only ผ่าน api-basedefense (ดู SaveSync.js)
 // ES Module จะถูก import ครั้งเดียวและ cache ไว้ (singleton) ทุก Scene ที่ import จึงใช้ state ก้อนเดียวกัน
 //
-// localStorage ยังคงเป็น local cache เสมอ (เขียนทุกครั้งที่ persist() เหมือนเดิมทุกประการ ไม่มีอะไรเปลี่ยน) — ใช้เป็นค่า
-// เริ่มต้นแบบ synchronous ตอนเปิดหน้า (ก่อนที่ server จะตอบกลับ) และเป็น fallback ตอน server โหลดไม่สำเร็จ ส่วน server
-// (ผ่าน SaveSync.js) จะกลายเป็นตัว authoritative แทนก็ต่อเมื่อ resolve member_id จาก URL ได้เท่านั้น — ดู SaveSync.js
-// สำหรับกติกาการตัดสินใจ hydrate/reset/เก็บของเดิมไว้ทั้งหมด
+// ไม่มี localStorage เกี่ยวข้องกับ gameplay save เลย (ตั้งใจ — ห้ามเพิ่มกลับมาเป็น cache/fallback/migration source
+// ใดๆ ทั้งสิ้น) this.data เริ่มต้นในหน่วยความจำด้วยค่า default ธรรมดาเสมอ แล้วรอ SaveSync ตัดสินใจว่าจะ hydrate จาก
+// server หรือคงค่า default ไว้ (ดู SaveSync.js สำหรับกติกาเต็ม: มี member_id+มี save / มี member_id+ไม่มี save /
+// ไม่มี member_id เลย (dev/test, ไม่มีการบันทึกถาวรใดๆ) / โหลดจาก server ไม่สำเร็จ) — เกมจะไม่เริ่มเล่นจริงจนกว่า
+// SaveSync.ready จะ resolve ก่อน (ดู title.js) จึงไม่มีช่วงเวลาที่ default state ที่ยังไม่ผ่านการตัดสินใจจะถูกเซฟทับ
+// save บน server ที่มีอยู่แล้วโดยไม่ตั้งใจ
 import { SaveSync } from './SaveSync.js';
-
-const SAVE_KEY = 'basedefense_save_v1';
 
 const DEFAULT_SAVE_DATA = {
     coins: 0, // เริ่มจากศูนย์จริงๆ — เล่น Stage 1 ด้วยสถานะเริ่มต้นก่อนถึงจะได้อัปเกรด (เดิม 1000 เป็นค่าสะดวกตอนเทส แต่ทำให้เศรษฐกิจพังตั้งแต่ยังไม่เริ่มเล่น)
@@ -27,8 +27,7 @@ function cloneDefault() {
     return JSON.parse(JSON.stringify(DEFAULT_SAVE_DATA));
 }
 
-// รวม partial data (จาก localStorage เดิม หรือจาก server) เข้ากับ default เสมอ เผื่อ save เก่า/จาก server ยังไม่มี
-// ฟิลด์ที่เพิ่งเพิ่มใน Phase หลังๆ — ใช้ร่วมกันทั้ง loadSaveData() และ hydrate() (SaveSync.js เรียกตอนโหลดจาก server)
+// รวม partial data จาก server เข้ากับ default เสมอ เผื่อ save เก่าบน server ยังไม่มีฟิลด์ที่เพิ่งเพิ่มใน Phase หลังๆ
 function mergeWithDefault(partial) {
     const merged = { ...cloneDefault(), ...partial };
     // PHP json_decode/json_encode แยกไม่ออกระหว่าง object ว่างกับ array ว่าง ({} กับ []) — object ว่างที่ส่งไป API
@@ -41,34 +40,15 @@ function mergeWithDefault(partial) {
     return merged;
 }
 
-function loadSaveData() {
-    try {
-        const raw = localStorage.getItem(SAVE_KEY);
-        if (!raw) return cloneDefault();
-        return mergeWithDefault(JSON.parse(raw));
-    } catch (e) {
-        console.warn('โหลด Save Data ไม่สำเร็จ ใช้ค่าเริ่มต้นแทน', e);
-        return cloneDefault();
-    }
-}
-
-// เก็บลง localStorage เท่านั้น ไม่ยุ่งกับ server — ใช้ตอน hydrate จาก server (เพื่อไม่ยิง save กลับไปหา server
-// ทันทีด้วยข้อมูลก้อนเดียวกับที่เพิ่งได้มา) ส่วน persist() ปกติ (ตอน state เปลี่ยนจริงจากการเล่น) ยิงไป server ด้วยเสมอ
-function persistLocal(data) {
-    try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify(data));
-    } catch (e) {
-        console.warn('บันทึก Save Data ไม่สำเร็จ', e);
-    }
-}
-
+// state เปลี่ยน -> ส่งไป schedule save กับ server เท่านั้น (ดู SaveSync.js: debounce + serialize) ไม่มีการเขียน
+// localStorage ใดๆ ในนี้ — ถ้ายังไม่รู้ member_id (dev/test เปิด index.html ตรงๆ) SaveSync.scheduleSave() จะเป็น no-op
+// เอง (เล่นได้ปกติแต่ progress จะไม่ถูกบันทึกถาวรที่ไหนเลย เป็นเซสชันชั่วคราวในหน่วยความจำล้วนๆ)
 function persist(data) {
-    persistLocal(data);
     SaveSync.scheduleSave(data);
 }
 
 export const SaveManager = {
-    data: loadSaveData(),
+    data: cloneDefault(),
 
     getCoins() {
         return this.data.coins;
@@ -156,17 +136,18 @@ export const SaveManager = {
     },
 
     // เรียกจาก SaveSync.js เพียงที่เดียว (ไม่เรียกตรงๆ จากที่อื่น) ตอนรู้ผลจาก server แล้วว่าจะใช้ state ไหน:
-    //   - serverData เป็น object -> มี save บน server อยู่แล้ว รวมเข้ากับ default แล้วสลับไปใช้ (server ชนะ local เสมอ)
-    //   - serverData เป็น null -> ยังไม่มี save บน server (ผู้เล่นใหม่) -> รีเซ็ตกลับ default ปกติของเกม ไม่ใช้ค่าที่
-    //     ค้างอยู่ใน localStorage key เดิม (อาจเป็นของ session/ผู้เล่นคนอื่นก่อนหน้าบนเครื่องเดียวกัน)
-    // ไม่ยิง save กลับไป server ทันที (ใช้ persistLocal ไม่ใช่ persist) เพราะข้อมูลชุดนี้มาจาก server เองอยู่แล้ว
-    // ไม่มีอะไรใหม่ให้ save กลับ — การเปลี่ยนแปลงจริงครั้งถัดไปตอนเล่นจะ sync ไป server ตามปกติเองผ่าน persist()
+    //   - serverData เป็น object -> มี save บน server อยู่แล้ว รวมเข้ากับ default แล้วสลับไปใช้ (server เป็นตัว
+    //     authoritative หนึ่งเดียว ไม่มี local cache ให้เทียบ)
+    //   - serverData เป็น null -> ยังไม่มี save บน server (ผู้เล่นใหม่ตัวจริง ยืนยันจาก server แล้วว่า exists:false)
+    //     -> รีเซ็ตกลับ default ปกติของเกม
+    // ไม่ยิง save กลับไป server ทันที เพราะข้อมูลชุดนี้มาจาก server เองอยู่แล้ว ไม่มีอะไรใหม่ให้ save กลับ —
+    // การเปลี่ยนแปลงจริงครั้งถัดไปตอนเล่นจะ sync ไป server ตามปกติเองผ่าน persist()
     hydrate(serverData) {
         this.data = serverData ? mergeWithDefault(serverData) : cloneDefault();
-        persistLocal(this.data);
     }
 };
 
 // เริ่ม resolve member_id + โหลด save จาก server ทันทีตอน module นี้ถูก import ครั้งแรก (เร็วที่สุดเท่าที่ทำได้ —
-// ไม่ต้องรอ Scene ไหนทำงานก่อน) SaveSync.ready ให้ Scene ที่ต้องรอผลใช้ (ดู title.js ก่อน start BaseScene)
+// ไม่ต้องรอ Scene ไหนทำงานก่อน) SaveSync.ready ให้ Scene ที่ต้องรอผลใช้ (ดู title.js — ต้องรอก่อนเริ่ม BaseScene
+// เสมอ และต้องบล็อกไม่ให้เข้าเกมถ้า SaveSync.ready resolve เป็น {ok:false} คือโหลดจาก server ไม่สำเร็จ)
 SaveSync.init({ hydrate: (serverData) => SaveManager.hydrate(serverData) });

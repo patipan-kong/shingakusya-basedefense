@@ -32,7 +32,8 @@ export async function loadFromServer(memberId) {
 }
 
 // บันทึก save ของ member_id นี้ไป server — data ต้องเป็น plain object (จะถูก JSON.stringify ในนี้)
-// throw เมื่อบันทึกไม่สำเร็จ ผู้เรียก (SaveSync.js) จะ catch ไว้เฉยๆ ไม่ทำให้เกม crash (เก็บไว้ในเครื่องแล้วผ่าน localStorage อยู่แล้ว)
+// throw เมื่อบันทึกไม่สำเร็จ ผู้เรียก (SaveSync.js) จะ catch ไว้เฉยๆ ไม่ทำให้เกม crash — ไม่มี local cache ให้ fallback
+// ไป การเปลี่ยนแปลงจะยัง "ค้าง" อยู่ใน memory ของ SaveManager และถูกลองส่งใหม่โดยอัตโนมัติตอนมีการเปลี่ยนแปลงครั้งถัดไป
 export async function saveToServer(memberId, data) {
     const controller = new AbortController();
     const clearTimer = withTimeout(controller);

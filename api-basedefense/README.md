@@ -55,8 +55,10 @@ the game should start from its own built-in defaults. This is deliberately disti
 
 returned with a non-2xx HTTP status. The client (`SaveSync.js`) treats these two very
 differently: `exists:false` initializes a fresh game; an error response means "we don't know what
-the player's save looks like right now" and must **not** reset or overwrite anything — the client
-keeps whatever it already has cached locally.
+the player's save looks like right now". Gameplay is **server-only** — there is no local cache to
+fall back to — so a load error must **not** be treated as "start fresh"; the client blocks
+gameplay from starting at all rather than risk saving default data over an existing server save it
+simply failed to read (see "Local vs. server save precedence" below).
 
 ### `POST index.php` with body `m=save&member_id=<id>&data=<json string>`
 
@@ -111,6 +113,15 @@ again while a request is in flight, that's coalesced into exactly one follow-up 
 current one finishes. This makes out-of-order responses structurally impossible without adding
 server-side versioning.
 
+On tab close (`pagehide`), a best-effort `sendBeacon` fires for any state that was debounced but
+not yet sent — but **only when idle** (no request currently in flight). A `sendBeacon` is a second,
+independent request outside the serialization queue above; firing one while a `fetch`-based save
+is still in flight would let the two race to the server in either order, and if the beacon (newer
+data) arrived first followed by the in-flight fetch (older, already-serialized data), the file
+would regress to older data. So `SaveSync.js` accepts a narrower, more standard trade-off instead:
+an in-flight save that gets killed by the browser mid-navigation may be lost, but a completed save
+can never be overwritten by an earlier one.
+
 ## Why `stageRecords` (or any empty object field) may round-trip as `[]`
 
 PHP's `json_decode($x, true)` turns both `{}` and `[]` into the same value (an empty PHP array),
@@ -124,23 +135,32 @@ every load from the server.
 
 ## Local vs. server save precedence (read this before assuming a "migration" happened)
 
-This API and the game's `SaveSync.js` do **not** attempt to migrate a pre-existing browser
-`localStorage` save into a member's first server save. Behavior is:
+Gameplay persistence is **server-only**. `localStorage` is never read or written for gameplay
+save/load — not as a cache, not as an offline fallback, not as a migration source (the only
+remaining `localStorage` use in the game is `TestLogger.js`'s `basedefense_testlog_v1`, an
+unrelated QA/balance log, not gameplay progress). `SaveManager.data` lives purely in memory for
+the life of the page. Startup behavior (`SaveSync.js`):
 
-- No `member_id` resolvable at all (missing/invalid `d`/`i`) → the game runs exactly as it did
-  before this change, `localStorage`-only, no network calls to this API.
-- `member_id` resolved, server has a save → server data wins, always.
-- `member_id` resolved, server has **no** save yet → the game starts from its own normal
-  hard-coded defaults, not from whatever happens to be sitting in the browser's shared
-  `basedefense_save_v1` localStorage key. That key is not member-scoped, so it could hold a
-  previous member's (or an old pre-migration) progress; seeding a new member's server save from it
-  would be a silent, unrequested "migration" with real ambiguity/data-loss risk, which this
-  implementation deliberately avoids per the task's instruction not to invent one. If a real
-  migration path is wanted later (e.g. an explicit "import my old local save" action), it should
-  be a conscious follow-up, not implicit.
-- `member_id` resolved, but the load request itself failed (network/timeout/server error) → the
-  game keeps whatever it already had loaded locally and does not reset. This is intentionally
-  different from "no save exists".
+- No `member_id` resolvable at all (missing/invalid `d`/`i`) → the game runs with in-memory
+  defaults for that page load only. Nothing is persisted anywhere (no network calls to this API,
+  no `localStorage` writes) — this is a transient session, intended for local dev/testing
+  (`testMode.js`/`devTools.js`) where no launch URL with `d`/`i` is present.
+- `member_id` resolved, server has a save (`exists:true`) → server data wins, always. Hydrated
+  directly into memory.
+- `member_id` resolved, server has **no** save yet (`exists:false`) → the game starts from its own
+  normal hard-coded defaults, confirmed by the server as a genuinely new player — not inferred from
+  the absence of any local data.
+- `member_id` resolved, but the load request itself failed (network/timeout/5xx/malformed
+  response) → the client does **not** fall back to defaults and does **not** start gameplay. There
+  is no local cache to fall back to, and starting with defaults would risk the player's first
+  in-game action overwriting a real save on the server that the client simply failed to read. The
+  game blocks at the title screen with an on-screen message asking the player to reload
+  (`title.js`); this is a deliberate "fail closed" choice rather than "fail open with defaults".
+
+An old browser-side `basedefense_save_v1` key from before this change (or from a pre-migration
+build) is never read, never uploaded, and never bound to a member — it is simply inert leftover
+data with no effect on gameplay. Nothing in this codebase deletes it automatically either; that
+was left as a non-essential, optional follow-up rather than added complexity here.
 
 ## Configuration / deployment
 
