@@ -1,0 +1,7 @@
+/* ฟอนต์หลักของเกม โหลดผ่าน rexwebfontloaderplugin (ดู src/scenes/boot.js) ก่อน Scene อื่นเริ่มสร้างข้อความใดๆ */
+@font-face {
+    font-family: 'YasashisaGothicBold';
+    src: url('../fonts/YasashisaGothicBold-V2.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}

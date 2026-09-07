@@ -1,0 +1,72 @@
+[
+  {
+    "no": 1,
+    "subject": "Society",
+    "grade": 1,
+    "quiz_text": "次の問題を読み、正しい答えを選びなさい。",
+    "quiz_imagefile": "society1-1",
+    "right_answer": 1,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "解説はテスト"
+  },
+  {
+    "no": 2,
+    "subject": "Society",
+    "grade": 1,
+    "quiz_text": "次の問題を読み、正しい答えを選びなさい。",
+    "quiz_imagefile": "society1-2",
+    "right_answer": 3,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "解説はテスト"
+  },
+  {
+    "no": 3,
+    "subject": "Society",
+    "grade": 1,
+    "quiz_text": "次の問題を読み、正しい答えを選びなさい。",
+    "quiz_imagefile": "society1-3",
+    "right_answer": 2,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "解説はテスト"
+  },
+  {
+    "no": 4,
+    "subject": "Society",
+    "grade": 1,
+    "quiz_text": "次の問題を読み、正しい答えを選びなさい。",
+    "quiz_imagefile": "society1-4",
+    "right_answer": 4,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "問題画像ミスっているので後で直します！"
+  },
+  {
+    "no": 5,
+    "subject": "Society",
+    "grade": 1,
+    "quiz_text": "次の問題を読み、正しい答えを選びなさい。",
+    "quiz_imagefile": "society1-5",
+    "right_answer": 4,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "問題画像ミスっているので後で直します！"
+  }
+]

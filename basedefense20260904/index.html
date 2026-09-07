@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, maximum-scale =1.0, user-scalable=0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="apple-mobile-web-app-capable" content="yes"> 
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-touch-fullscreen" content="YES">
+    <meta name="apple-mobile-web-app-title" content="shout">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Base Defense 2D</title>
+    
+    <!-- โหลด CSS จากโฟลเดอร์ css -->
+    <link rel="stylesheet" href="css/game.css">
+    
+    <!-- โหลด Phaser จากโฟลเดอร์ lib -->
+    <script src="lib/phaser.min.js"></script>
+    <script src="lib/rexwebfontloaderplugin.min.js"></script>
+    <!-- ถอดรหัส member_id จาก URL params d/i (ธรรมเนียมเดียวกับ Dungeon Survival) — ดู src/systems/MemberSession.js
+         ต้องโหลดเป็น classic script ก่อน main.js (module) เพื่อให้ window.CryptoJS พร้อมใช้ก่อน -->
+    <script src="lib/crypto-js.min.js"></script>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <!-- main.js เป็น ES Module และ import Scene ทั้งหมดเข้ามาเอง -->
+    <script type="module" src="main.js"></script>
+</body>
+</html>

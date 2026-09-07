@@ -1,0 +1,72 @@
+[
+  {
+    "no": 1,
+    "subject": "English",
+    "grade": 1,
+    "quiz_text": "〔　　　〕に適する英文をア～エから選びなさい。",
+    "quiz_imagefile": "english1-1.png",
+    "right_answer": 1,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "〔　　　　〕のあと、Aが His name is Max. と答えていることから、直前には名前をたずねる質問が入るとわかる。What is his name? が正解となる。"
+  },
+  {
+    "no": 2,
+    "subject": "English",
+    "grade": 1,
+    "quiz_text": "次のア～エの英文のうち、文法的に誤りのあるものを1つ選び、記号で答えなさい。",
+    "quiz_imagefile": "english1-2.png",
+    "right_answer": 4,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "Ken は3人称単数なので、現在形の一般動詞には -s をつける。Ken play ではなく、Ken plays とする。\n→Ken plays soccer with his friends."
+  },
+  {
+    "no": 3,
+    "subject": "English",
+    "grade": 1,
+    "quiz_text": "次の英文を読んで、質問に答えなさい。",
+    "quiz_imagefile": "english1-3.png",
+    "right_answer": 2,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "本文に She reads books every day. とあるため、 イ が正解となる。\nア：父が教えているのは英語ではなく日本語のため×。\nウ：弟は11歳ではなく12歳のため×。\nエ：「速く走ることができる」とはあるが、泳げるかどうかについては言及がないため×。"
+  },
+  {
+    "no": 4,
+    "subject": "English",
+    "grade": 1,
+    "quiz_text": "次の英文を読んで、質問に答えなさい。",
+    "quiz_imagefile": "english1-4.png",
+    "right_answer": 1,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "legs（脚）の意味が分からなくても、ヒント①の big（大きい）から大型の動物だとわかる。さらにヒント③にある long nose（長い鼻）や big ears（大きい耳）という語に注目できれば、特徴的な体を持つゾウだと特定できる。"
+  },
+  {
+    "no": 5,
+    "subject": "English",
+    "grade": 1,
+    "quiz_text": "次の文を読んで、質問に答えなさい。ただし、習っていない語には注釈がありません。知っている単語や文脈から、意味を推測して答えなさい。",
+    "quiz_imagefile": "english1-5.png",
+    "right_answer": 3,
+    "choice_type": 0,
+    "choice_text1": "ア",
+    "choice_text2": "イ",
+    "choice_text3": "ウ",
+    "choice_text4": "エ",
+    "kaisetu_text": "hippo（カバ）や otter（カワウソ）の意味が分からなくても、big mouth（大きい口）や squirrel monkey（リスサル） の monkey という知っている単語から、生き物に関連する場面だと見当がつく。さらに、「次は〜が見たいな」や「行こう！」というやり取りから、動物園での会話だと推測できる。\nA: あのカバを見て！\nB: わあ！なんて大きな口なんだ！\nA: 見て！リスザルがいるよ。\nB: かわいいね。\nA: 次はカワウソを見たいな。\nB: いいよ、行こう。"
+  }
+]
